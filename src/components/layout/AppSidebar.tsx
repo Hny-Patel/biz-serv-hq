@@ -61,7 +61,7 @@ export function AppSidebar() {
 
       {/* Nav */}
       <nav className="flex-1 py-3 space-y-0.5 overflow-y-auto">
-        {navItems.map((item) => {
+        {allNavItems.map((item) => {
           const isActive = location.pathname === item.path;
           return (
             <NavLink
