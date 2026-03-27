@@ -36,7 +36,11 @@ const navItems = [
 export function AppSidebar() {
   const [collapsed, setCollapsed] = useState(false);
   const location = useLocation();
-  const { signOut, profile } = useAuth();
+  const { signOut, profile, isSuperAdmin } = useAuth();
+
+  const allNavItems = isSuperAdmin
+    ? [...navItems, { label: "Super Admin", icon: ShieldCheck, path: "/admin" }]
+    : navItems;
 
   return (
     <aside
