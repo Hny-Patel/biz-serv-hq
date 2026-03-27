@@ -1,16 +1,16 @@
 import { Button } from "@/components/ui/button";
-import { Plus } from "lucide-react";
+import { Plus, Inbox } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 
-interface EmptyStateProps {
-  icon: LucideIcon;
+export interface EmptyStateProps {
+  icon?: LucideIcon;
   title: string;
   description: string;
   actionLabel?: string;
   onAction?: () => void;
 }
 
-export function EmptyState({ icon: Icon, title, description, actionLabel, onAction }: EmptyStateProps) {
+export function EmptyState({ icon: Icon = Inbox, title, description, actionLabel, onAction }: EmptyStateProps) {
   return (
     <div className="flex flex-col items-center justify-center py-16 text-center animate-fade-in">
       <div className="p-4 rounded-full bg-accent mb-4">

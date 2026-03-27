@@ -57,6 +57,7 @@ const App = () => (
               <Route path="/billing" element={<BillingPage />} />
               <Route path="/team" element={<TeamPage />} />
               <Route path="/settings" element={<SettingsPage />} />
+              <Route path="/admin" element={<ProtectedRoute requiredRoles={["super_admin"]}><SuperAdminPage /></ProtectedRoute>} />
             </Route>
 
             <Route path="*" element={<NotFound />} />
