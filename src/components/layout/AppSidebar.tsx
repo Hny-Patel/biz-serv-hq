@@ -76,6 +76,15 @@ export function AppSidebar() {
         })}
       </nav>
 
+      {/* Sign out */}
+      <button
+        onClick={() => signOut()}
+        className="flex items-center gap-3 mx-2 px-3 py-2.5 rounded-md text-sm font-medium text-sidebar-fg hover:bg-sidebar-hover hover:text-sidebar-fg-active transition-colors"
+      >
+        <LogOut className="h-[18px] w-[18px] shrink-0" />
+        {!collapsed && <span>Sign out</span>}
+      </button>
+
       {/* Collapse toggle */}
       <button
         onClick={() => setCollapsed(!collapsed)}
