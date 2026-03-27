@@ -16,6 +16,7 @@ import InvoicesPage from "./pages/InvoicesPage";
 import BillingPage from "./pages/BillingPage";
 import TeamPage from "./pages/TeamPage";
 import SettingsPage from "./pages/SettingsPage";
+import SuperAdminPage from "./pages/SuperAdminPage";
 import LoginPage from "./pages/LoginPage";
 import SignupPage from "./pages/SignupPage";
 import ForgotPasswordPage from "./pages/ForgotPasswordPage";
