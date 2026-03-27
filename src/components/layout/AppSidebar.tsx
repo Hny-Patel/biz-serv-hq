@@ -15,6 +15,7 @@ import {
   ChevronRight,
   Zap,
   LogOut,
+  ShieldCheck,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useAuth } from "@/contexts/AuthContext";
@@ -35,7 +36,11 @@ const navItems = [
 export function AppSidebar() {
   const [collapsed, setCollapsed] = useState(false);
   const location = useLocation();
-  const { signOut, profile } = useAuth();
+  const { signOut, profile, isSuperAdmin } = useAuth();
+
+  const allNavItems = isSuperAdmin
+    ? [...navItems, { label: "Super Admin", icon: ShieldCheck, path: "/admin" }]
+    : navItems;
 
   return (
     <aside
@@ -56,7 +61,7 @@ export function AppSidebar() {
 
       {/* Nav */}
       <nav className="flex-1 py-3 space-y-0.5 overflow-y-auto">
-        {navItems.map((item) => {
+        {allNavItems.map((item) => {
           const isActive = location.pathname === item.path;
           return (
             <NavLink
