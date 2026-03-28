@@ -36,6 +36,8 @@ export default function InvoiceFormPage() {
   const [discountType, setDiscountType] = useState("percentage");
   const [discountValue, setDiscountValue] = useState(0);
   const [attachmentUrl, setAttachmentUrl] = useState("");
+  const [termsAndConditions, setTermsAndConditions] = useState("");
+  const [currencyId, setCurrencyId] = useState<string>("");
   const [taxDialogOpen, setTaxDialogOpen] = useState(false);
   const [newTaxName, setNewTaxName] = useState("");
   const [newTaxRate, setNewTaxRate] = useState("");
@@ -73,6 +75,17 @@ export default function InvoiceFormPage() {
     enabled: !!companyId,
   });
 
+  // Fetch currencies
+  const { data: currencies = [] } = useQuery({
+    queryKey: ["currencies", companyId],
+    queryFn: async () => {
+      if (!companyId) return [];
+      const { data } = await supabase.from("currencies").select("*").eq("company_id", companyId).eq("is_active", true).order("is_default", { ascending: false });
+      return data ?? [];
+    },
+    enabled: !!companyId,
+  });
+
   // Fetch existing invoice for edit
   const { data: existingInvoice } = useQuery({
     queryKey: ["invoice", id],
@@ -102,6 +115,8 @@ export default function InvoiceFormPage() {
       setDiscountType((existingInvoice as any).discount_type ?? "percentage");
       setDiscountValue(Number((existingInvoice as any).discount_value ?? 0));
       setAttachmentUrl((existingInvoice as any).attachment_url ?? "");
+      setTermsAndConditions((existingInvoice as any).terms_and_conditions ?? "");
+      setCurrencyId((existingInvoice as any).currency_id ?? "");
       if ((existingInvoice as any).line_items?.length) {
         setItems(
           (existingInvoice as any).line_items.map((li: any) => ({
@@ -118,6 +133,16 @@ export default function InvoiceFormPage() {
 
   const selectedCustomer = customers.find((c) => c.id === customerId);
   const selectedTax = taxRates.find((t: any) => t.id === taxRateId);
+  const selectedCurrency = currencies.find((c: any) => (c as any).id === currencyId);
+  const currencySymbol = selectedCurrency ? (selectedCurrency as any).symbol : "₹";
+
+  // Set default currency
+  useEffect(() => {
+    if (!currencyId && currencies.length > 0) {
+      const def = currencies.find((c: any) => c.is_default);
+      if (def) setCurrencyId((def as any).id);
+    }
+  }, [currencies, currencyId]);
 
   // Calculations
   const subtotal = items.reduce((sum, i) => sum + i.total, 0);
@@ -160,6 +185,8 @@ export default function InvoiceFormPage() {
         discount_type: discountType,
         discount_value: discountValue,
         attachment_url: attachmentUrl || null,
+        terms_and_conditions: termsAndConditions || null,
+        currency_id: currencyId || null,
       };
 
       let invoiceId = id;
