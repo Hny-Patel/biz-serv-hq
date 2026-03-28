@@ -82,6 +82,50 @@ export type Database = {
           },
         ]
       }
+      currencies: {
+        Row: {
+          code: string
+          company_id: string
+          created_at: string
+          id: string
+          is_active: boolean | null
+          is_default: boolean | null
+          name: string
+          symbol: string
+          updated_at: string
+        }
+        Insert: {
+          code: string
+          company_id: string
+          created_at?: string
+          id?: string
+          is_active?: boolean | null
+          is_default?: boolean | null
+          name: string
+          symbol: string
+          updated_at?: string
+        }
+        Update: {
+          code?: string
+          company_id?: string
+          created_at?: string
+          id?: string
+          is_active?: boolean | null
+          is_default?: boolean | null
+          name?: string
+          symbol?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "currencies_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       customers: {
         Row: {
           address: string | null
@@ -178,6 +222,7 @@ export type Database = {
           attachment_url: string | null
           company_id: string
           created_at: string
+          currency_id: string | null
           customer_id: string
           discount_type: string | null
           discount_value: number | null
@@ -191,6 +236,7 @@ export type Database = {
           subtotal: number
           tax_amount: number | null
           tax_rate: number | null
+          terms_and_conditions: string | null
           total: number
           updated_at: string
         }
@@ -198,6 +244,7 @@ export type Database = {
           attachment_url?: string | null
           company_id: string
           created_at?: string
+          currency_id?: string | null
           customer_id: string
           discount_type?: string | null
           discount_value?: number | null
@@ -211,6 +258,7 @@ export type Database = {
           subtotal?: number
           tax_amount?: number | null
           tax_rate?: number | null
+          terms_and_conditions?: string | null
           total?: number
           updated_at?: string
         }
@@ -218,6 +266,7 @@ export type Database = {
           attachment_url?: string | null
           company_id?: string
           created_at?: string
+          currency_id?: string | null
           customer_id?: string
           discount_type?: string | null
           discount_value?: number | null
@@ -231,6 +280,7 @@ export type Database = {
           subtotal?: number
           tax_amount?: number | null
           tax_rate?: number | null
+          terms_and_conditions?: string | null
           total?: number
           updated_at?: string
         }
@@ -240,6 +290,13 @@ export type Database = {
             columns: ["company_id"]
             isOneToOne: false
             referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "invoices_currency_id_fkey"
+            columns: ["currency_id"]
+            isOneToOne: false
+            referencedRelation: "currencies"
             referencedColumns: ["id"]
           },
           {
@@ -490,11 +547,13 @@ export type Database = {
           company_id: string
           created_at: string
           created_by: string | null
+          currency_id: string | null
           customer_id: string
           id: string
           notes: string | null
           parent_proposal_id: string | null
           status: Database["public"]["Enums"]["proposal_status"] | null
+          terms_and_conditions: string | null
           title: string
           total: number
           updated_at: string
@@ -504,11 +563,13 @@ export type Database = {
           company_id: string
           created_at?: string
           created_by?: string | null
+          currency_id?: string | null
           customer_id: string
           id?: string
           notes?: string | null
           parent_proposal_id?: string | null
           status?: Database["public"]["Enums"]["proposal_status"] | null
+          terms_and_conditions?: string | null
           title: string
           total?: number
           updated_at?: string
@@ -518,11 +579,13 @@ export type Database = {
           company_id?: string
           created_at?: string
           created_by?: string | null
+          currency_id?: string | null
           customer_id?: string
           id?: string
           notes?: string | null
           parent_proposal_id?: string | null
           status?: Database["public"]["Enums"]["proposal_status"] | null
+          terms_and_conditions?: string | null
           title?: string
           total?: number
           updated_at?: string
@@ -534,6 +597,13 @@ export type Database = {
             columns: ["company_id"]
             isOneToOne: false
             referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "proposals_currency_id_fkey"
+            columns: ["currency_id"]
+            isOneToOne: false
+            referencedRelation: "currencies"
             referencedColumns: ["id"]
           },
           {
