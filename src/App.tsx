@@ -11,9 +11,11 @@ import ShopPage from "./pages/ShopPage";
 import CustomersPage from "./pages/CustomersPage";
 import ServicesPage from "./pages/ServicesPage";
 import ProposalsPage from "./pages/ProposalsPage";
+import ProposalFormPage from "./pages/ProposalFormPage";
 import JobsPage from "./pages/JobsPage";
 import InvoicesPage from "./pages/InvoicesPage";
 import InvoiceFormPage from "./pages/InvoiceFormPage";
+import CurrenciesPage from "./pages/CurrenciesPage";
 import BillingPage from "./pages/BillingPage";
 import TeamPage from "./pages/TeamPage";
 import SettingsPage from "./pages/SettingsPage";
@@ -53,10 +55,13 @@ const App = () => (
               <Route path="/customers" element={<CustomersPage />} />
               <Route path="/services" element={<ServicesPage />} />
               <Route path="/proposals" element={<ProposalsPage />} />
+              <Route path="/proposals/new" element={<ProposalFormPage />} />
+              <Route path="/proposals/:id/edit" element={<ProposalFormPage />} />
               <Route path="/jobs" element={<JobsPage />} />
               <Route path="/invoices" element={<InvoicesPage />} />
               <Route path="/invoices/new" element={<InvoiceFormPage />} />
               <Route path="/invoices/:id/edit" element={<InvoiceFormPage />} />
+              <Route path="/currencies" element={<CurrenciesPage />} />
               <Route path="/billing" element={<BillingPage />} />
               <Route path="/team" element={<TeamPage />} />
               <Route path="/settings" element={<SettingsPage />} />

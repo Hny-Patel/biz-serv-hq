@@ -16,6 +16,7 @@ import {
   Zap,
   LogOut,
   ShieldCheck,
+  Coins,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useAuth } from "@/contexts/AuthContext";
@@ -28,6 +29,7 @@ const navItems = [
   { label: "Proposals", icon: FileText, path: "/proposals" },
   { label: "Jobs", icon: Briefcase, path: "/jobs" },
   { label: "Invoices", icon: Receipt, path: "/invoices" },
+  { label: "Currencies", icon: Coins, path: "/currencies" },
   { label: "Billing", icon: CreditCard, path: "/billing" },
   { label: "Team", icon: UserCog, path: "/team" },
   { label: "Settings", icon: Settings, path: "/settings" },
