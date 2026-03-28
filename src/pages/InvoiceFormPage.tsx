@@ -36,6 +36,8 @@ export default function InvoiceFormPage() {
   const [discountType, setDiscountType] = useState("percentage");
   const [discountValue, setDiscountValue] = useState(0);
   const [attachmentUrl, setAttachmentUrl] = useState("");
+  const [termsAndConditions, setTermsAndConditions] = useState("");
+  const [currencyId, setCurrencyId] = useState<string>("");
   const [taxDialogOpen, setTaxDialogOpen] = useState(false);
   const [newTaxName, setNewTaxName] = useState("");
   const [newTaxRate, setNewTaxRate] = useState("");
@@ -73,6 +75,17 @@ export default function InvoiceFormPage() {
     enabled: !!companyId,
   });
 
+  // Fetch currencies
+  const { data: currencies = [] } = useQuery({
+    queryKey: ["currencies", companyId],
+    queryFn: async () => {
+      if (!companyId) return [];
+      const { data } = await supabase.from("currencies").select("*").eq("company_id", companyId).eq("is_active", true).order("is_default", { ascending: false });
+      return data ?? [];
+    },
+    enabled: !!companyId,
+  });
+
   // Fetch existing invoice for edit
   const { data: existingInvoice } = useQuery({
     queryKey: ["invoice", id],
@@ -102,6 +115,8 @@ export default function InvoiceFormPage() {
       setDiscountType((existingInvoice as any).discount_type ?? "percentage");
       setDiscountValue(Number((existingInvoice as any).discount_value ?? 0));
       setAttachmentUrl((existingInvoice as any).attachment_url ?? "");
+      setTermsAndConditions((existingInvoice as any).terms_and_conditions ?? "");
+      setCurrencyId((existingInvoice as any).currency_id ?? "");
       if ((existingInvoice as any).line_items?.length) {
         setItems(
           (existingInvoice as any).line_items.map((li: any) => ({
@@ -118,6 +133,16 @@ export default function InvoiceFormPage() {
 
   const selectedCustomer = customers.find((c) => c.id === customerId);
   const selectedTax = taxRates.find((t: any) => t.id === taxRateId);
+  const selectedCurrency = currencies.find((c: any) => (c as any).id === currencyId);
+  const currencySymbol = selectedCurrency ? (selectedCurrency as any).symbol : "₹";
+
+  // Set default currency
+  useEffect(() => {
+    if (!currencyId && currencies.length > 0) {
+      const def = currencies.find((c: any) => c.is_default);
+      if (def) setCurrencyId((def as any).id);
+    }
+  }, [currencies, currencyId]);
 
   // Calculations
   const subtotal = items.reduce((sum, i) => sum + i.total, 0);
@@ -160,6 +185,8 @@ export default function InvoiceFormPage() {
         discount_type: discountType,
         discount_value: discountValue,
         attachment_url: attachmentUrl || null,
+        terms_and_conditions: termsAndConditions || null,
+        currency_id: currencyId || null,
       };
 
       let invoiceId = id;
@@ -244,7 +271,9 @@ export default function InvoiceFormPage() {
       taxAmount,
       total,
       notes,
+      termsAndConditions,
       status,
+      currencySymbol,
     });
   };
 
@@ -316,7 +345,7 @@ export default function InvoiceFormPage() {
       {/* Invoice Details */}
       <Card>
         <CardContent className="pt-6">
-          <div className="grid sm:grid-cols-3 gap-4">
+          <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
             <div>
               <Label>Status</Label>
               <Select value={status} onValueChange={setStatus}>
@@ -332,6 +361,17 @@ export default function InvoiceFormPage() {
             <div>
               <Label>Due Date</Label>
               <Input type="date" value={dueDate} onChange={(e) => setDueDate(e.target.value)} />
+            </div>
+            <div>
+              <Label>Currency</Label>
+              <Select value={currencyId} onValueChange={setCurrencyId}>
+                <SelectTrigger><SelectValue placeholder="Select currency" /></SelectTrigger>
+                <SelectContent>
+                  {currencies.map((c: any) => (
+                    <SelectItem key={c.id} value={c.id}>{c.symbol} {c.code}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
             </div>
             <div>
               <Label>Attachment URL</Label>
@@ -351,7 +391,7 @@ export default function InvoiceFormPage() {
           <CardTitle className="text-base">Line Items</CardTitle>
         </CardHeader>
         <CardContent>
-          <InvoiceLineItems items={items} onChange={setItems} />
+          <InvoiceLineItems items={items} onChange={setItems} currencySymbol={currencySymbol} />
         </CardContent>
       </Card>
 
@@ -392,7 +432,7 @@ export default function InvoiceFormPage() {
                   </SelectTrigger>
                   <SelectContent>
                     <SelectItem value="percentage">%</SelectItem>
-                    <SelectItem value="fixed">Fixed ($)</SelectItem>
+                    <SelectItem value="fixed">Fixed</SelectItem>
                   </SelectContent>
                 </Select>
                 <Input
@@ -412,6 +452,12 @@ export default function InvoiceFormPage() {
               <Textarea rows={3} value={notes} onChange={(e) => setNotes(e.target.value)} placeholder="Payment terms, thank you note, etc." />
             </div>
 
+            {/* Terms & Conditions */}
+            <div>
+              <Label>Terms & Conditions</Label>
+              <Textarea rows={4} value={termsAndConditions} onChange={(e) => setTermsAndConditions(e.target.value)} placeholder="Payment terms, warranty, liability, etc." />
+            </div>
+
             {attachmentUrl && (
               <div>
                 <Label>Attachment</Label>
@@ -429,14 +475,14 @@ export default function InvoiceFormPage() {
             <div className="space-y-3">
               <div className="flex justify-between text-sm">
                 <span className="text-muted-foreground">Subtotal</span>
-                <span className="font-medium">${subtotal.toFixed(2)}</span>
+                <span className="font-medium">{currencySymbol}{subtotal.toFixed(2)}</span>
               </div>
               {discountAmount > 0 && (
                 <div className="flex justify-between text-sm">
                   <span className="text-muted-foreground">
                     Discount {discountType === "percentage" ? `(${discountValue}%)` : ""}
                   </span>
-                  <span className="font-medium text-destructive">-${discountAmount.toFixed(2)}</span>
+                  <span className="font-medium text-destructive">-{currencySymbol}{discountAmount.toFixed(2)}</span>
                 </div>
               )}
               {taxAmount > 0 && (
@@ -444,12 +490,12 @@ export default function InvoiceFormPage() {
                   <span className="text-muted-foreground">
                     {selectedTax ? `${(selectedTax as any).name} (${taxRate}%)` : `Tax (${taxRate}%)`}
                   </span>
-                  <span className="font-medium">${taxAmount.toFixed(2)}</span>
+                  <span className="font-medium">{currencySymbol}{taxAmount.toFixed(2)}</span>
                 </div>
               )}
               <div className="border-t pt-3 flex justify-between">
                 <span className="font-semibold text-lg">Total</span>
-                <span className="font-bold text-lg">${total.toFixed(2)}</span>
+                <span className="font-bold text-lg">{currencySymbol}{total.toFixed(2)}</span>
               </div>
             </div>
           </CardContent>

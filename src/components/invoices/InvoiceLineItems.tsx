@@ -14,9 +14,10 @@ export interface LineItem {
 interface Props {
   items: LineItem[];
   onChange: (items: LineItem[]) => void;
+  currencySymbol?: string;
 }
 
-export function InvoiceLineItems({ items, onChange }: Props) {
+export function InvoiceLineItems({ items, onChange, currencySymbol = "₹" }: Props) {
   const addItem = () => {
     onChange([
       ...items,
@@ -99,7 +100,7 @@ export function InvoiceLineItems({ items, onChange }: Props) {
                         className="h-9"
                       />
                       <div className="text-sm font-medium tabular-nums px-2">
-                        ${item.total.toFixed(2)}
+                        {currencySymbol}{item.total.toFixed(2)}
                       </div>
                       <Button
                         type="button"
