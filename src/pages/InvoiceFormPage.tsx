@@ -343,7 +343,7 @@ export default function InvoiceFormPage() {
       {/* Invoice Details */}
       <Card>
         <CardContent className="pt-6">
-          <div className="grid sm:grid-cols-3 gap-4">
+          <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
             <div>
               <Label>Status</Label>
               <Select value={status} onValueChange={setStatus}>
@@ -359,6 +359,17 @@ export default function InvoiceFormPage() {
             <div>
               <Label>Due Date</Label>
               <Input type="date" value={dueDate} onChange={(e) => setDueDate(e.target.value)} />
+            </div>
+            <div>
+              <Label>Currency</Label>
+              <Select value={currencyId} onValueChange={setCurrencyId}>
+                <SelectTrigger><SelectValue placeholder="Select currency" /></SelectTrigger>
+                <SelectContent>
+                  {currencies.map((c: any) => (
+                    <SelectItem key={c.id} value={c.id}>{c.symbol} {c.code}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
             </div>
             <div>
               <Label>Attachment URL</Label>
@@ -378,7 +389,7 @@ export default function InvoiceFormPage() {
           <CardTitle className="text-base">Line Items</CardTitle>
         </CardHeader>
         <CardContent>
-          <InvoiceLineItems items={items} onChange={setItems} />
+          <InvoiceLineItems items={items} onChange={setItems} currencySymbol={currencySymbol} />
         </CardContent>
       </Card>
 
@@ -419,7 +430,7 @@ export default function InvoiceFormPage() {
                   </SelectTrigger>
                   <SelectContent>
                     <SelectItem value="percentage">%</SelectItem>
-                    <SelectItem value="fixed">Fixed ($)</SelectItem>
+                    <SelectItem value="fixed">Fixed</SelectItem>
                   </SelectContent>
                 </Select>
                 <Input
@@ -439,6 +450,12 @@ export default function InvoiceFormPage() {
               <Textarea rows={3} value={notes} onChange={(e) => setNotes(e.target.value)} placeholder="Payment terms, thank you note, etc." />
             </div>
 
+            {/* Terms & Conditions */}
+            <div>
+              <Label>Terms & Conditions</Label>
+              <Textarea rows={4} value={termsAndConditions} onChange={(e) => setTermsAndConditions(e.target.value)} placeholder="Payment terms, warranty, liability, etc." />
+            </div>
+
             {attachmentUrl && (
               <div>
                 <Label>Attachment</Label>
@@ -456,14 +473,14 @@ export default function InvoiceFormPage() {
             <div className="space-y-3">
               <div className="flex justify-between text-sm">
                 <span className="text-muted-foreground">Subtotal</span>
-                <span className="font-medium">${subtotal.toFixed(2)}</span>
+                <span className="font-medium">{currencySymbol}{subtotal.toFixed(2)}</span>
               </div>
               {discountAmount > 0 && (
                 <div className="flex justify-between text-sm">
                   <span className="text-muted-foreground">
                     Discount {discountType === "percentage" ? `(${discountValue}%)` : ""}
                   </span>
-                  <span className="font-medium text-destructive">-${discountAmount.toFixed(2)}</span>
+                  <span className="font-medium text-destructive">-{currencySymbol}{discountAmount.toFixed(2)}</span>
                 </div>
               )}
               {taxAmount > 0 && (
@@ -471,12 +488,12 @@ export default function InvoiceFormPage() {
                   <span className="text-muted-foreground">
                     {selectedTax ? `${(selectedTax as any).name} (${taxRate}%)` : `Tax (${taxRate}%)`}
                   </span>
-                  <span className="font-medium">${taxAmount.toFixed(2)}</span>
+                  <span className="font-medium">{currencySymbol}{taxAmount.toFixed(2)}</span>
                 </div>
               )}
               <div className="border-t pt-3 flex justify-between">
                 <span className="font-semibold text-lg">Total</span>
-                <span className="font-bold text-lg">${total.toFixed(2)}</span>
+                <span className="font-bold text-lg">{currencySymbol}{total.toFixed(2)}</span>
               </div>
             </div>
           </CardContent>
