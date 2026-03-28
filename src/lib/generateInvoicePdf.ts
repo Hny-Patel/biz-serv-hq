@@ -23,12 +23,15 @@ interface PdfInvoice {
   taxAmount: number;
   total: number;
   notes?: string | null;
+  termsAndConditions?: string | null;
   status?: string;
+  currencySymbol?: string;
 }
 
 export function generateInvoicePdf(inv: PdfInvoice) {
   const doc = new jsPDF();
   const pageWidth = doc.internal.pageSize.getWidth();
+  const cs = inv.currencySymbol ?? "₹";
 
   // Header
   doc.setFontSize(22);
@@ -83,8 +86,8 @@ export function generateInvoicePdf(inv: PdfInvoice) {
       String(i + 1),
       item.description,
       String(item.quantity),
-      `$${item.unit_price.toFixed(2)}`,
-      `$${item.total.toFixed(2)}`,
+      `${cs}${item.unit_price.toFixed(2)}`,
+      `${cs}${item.total.toFixed(2)}`,
     ]),
     headStyles: { fillColor: [40, 167, 148], textColor: 255, fontStyle: "bold" },
     alternateRowStyles: { fillColor: [245, 245, 245] },
@@ -110,14 +113,14 @@ export function generateInvoicePdf(inv: PdfInvoice) {
   };
 
   let sy = finalY;
-  drawRow("Subtotal", `$${inv.subtotal.toFixed(2)}`, sy);
+  drawRow("Subtotal", `${cs}${inv.subtotal.toFixed(2)}`, sy);
   sy += 7;
 
   if (inv.discountAmount > 0) {
     const discLabel = inv.discountType === "percentage"
       ? `Discount (${inv.discountValue}%)`
       : "Discount";
-    drawRow(discLabel, `-$${inv.discountAmount.toFixed(2)}`, sy);
+    drawRow(discLabel, `-${cs}${inv.discountAmount.toFixed(2)}`, sy);
     sy += 7;
   }
 
@@ -125,14 +128,14 @@ export function generateInvoicePdf(inv: PdfInvoice) {
     const taxLabel = inv.taxName
       ? `${inv.taxName} (${inv.taxRate}%)`
       : `Tax (${inv.taxRate}%)`;
-    drawRow(taxLabel, `$${inv.taxAmount.toFixed(2)}`, sy);
+    drawRow(taxLabel, `${cs}${inv.taxAmount.toFixed(2)}`, sy);
     sy += 7;
   }
 
   doc.setDrawColor(200);
   doc.line(summaryX, sy - 2, pageWidth - 14, sy - 2);
   sy += 3;
-  drawRow("Total", `$${inv.total.toFixed(2)}`, sy, true);
+  drawRow("Total", `${cs}${inv.total.toFixed(2)}`, sy, true);
 
   // Notes
   if (inv.notes) {
@@ -144,6 +147,20 @@ export function generateInvoicePdf(inv: PdfInvoice) {
     doc.setFont("helvetica", "normal");
     doc.setTextColor(80);
     const lines = doc.splitTextToSize(inv.notes, pageWidth - 28);
+    doc.text(lines, 14, sy + 6);
+    sy += 6 + lines.length * 5;
+  }
+
+  // Terms & Conditions
+  if (inv.termsAndConditions) {
+    sy += 10;
+    doc.setFont("helvetica", "bold");
+    doc.setFontSize(10);
+    doc.setTextColor(40);
+    doc.text("Terms & Conditions", 14, sy);
+    doc.setFont("helvetica", "normal");
+    doc.setTextColor(80);
+    const lines = doc.splitTextToSize(inv.termsAndConditions, pageWidth - 28);
     doc.text(lines, 14, sy + 6);
   }
 
