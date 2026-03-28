@@ -139,6 +139,7 @@ export type Database = {
           id: string
           invoice_id: string
           quantity: number
+          sort_order: number | null
           total: number
           unit_price: number
         }
@@ -148,6 +149,7 @@ export type Database = {
           id?: string
           invoice_id: string
           quantity?: number
+          sort_order?: number | null
           total?: number
           unit_price?: number
         }
@@ -157,6 +159,7 @@ export type Database = {
           id?: string
           invoice_id?: string
           quantity?: number
+          sort_order?: number | null
           total?: number
           unit_price?: number
         }
@@ -172,9 +175,12 @@ export type Database = {
       }
       invoices: {
         Row: {
+          attachment_url: string | null
           company_id: string
           created_at: string
           customer_id: string
+          discount_type: string | null
+          discount_value: number | null
           due_date: string | null
           id: string
           invoice_number: string
@@ -189,9 +195,12 @@ export type Database = {
           updated_at: string
         }
         Insert: {
+          attachment_url?: string | null
           company_id: string
           created_at?: string
           customer_id: string
+          discount_type?: string | null
+          discount_value?: number | null
           due_date?: string | null
           id?: string
           invoice_number: string
@@ -206,9 +215,12 @@ export type Database = {
           updated_at?: string
         }
         Update: {
+          attachment_url?: string | null
           company_id?: string
           created_at?: string
           customer_id?: string
+          discount_type?: string | null
+          discount_value?: number | null
           due_date?: string | null
           id?: string
           invoice_number?: string
@@ -630,6 +642,44 @@ export type Database = {
         Relationships: [
           {
             foreignKeyName: "shops_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      tax_rates: {
+        Row: {
+          company_id: string
+          created_at: string
+          id: string
+          is_active: boolean | null
+          name: string
+          rate: number
+          updated_at: string
+        }
+        Insert: {
+          company_id: string
+          created_at?: string
+          id?: string
+          is_active?: boolean | null
+          name: string
+          rate?: number
+          updated_at?: string
+        }
+        Update: {
+          company_id?: string
+          created_at?: string
+          id?: string
+          is_active?: boolean | null
+          name?: string
+          rate?: number
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "tax_rates_company_id_fkey"
             columns: ["company_id"]
             isOneToOne: false
             referencedRelation: "companies"
