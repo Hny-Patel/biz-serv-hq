@@ -89,7 +89,9 @@ export default function InvoicesPage() {
       taxAmount: Number(inv.tax_amount ?? 0),
       total: Number(inv.total),
       notes: inv.notes,
+      termsAndConditions: (inv as any).terms_and_conditions,
       status: inv.status,
+      currencySymbol: "₹",
     });
   };
 

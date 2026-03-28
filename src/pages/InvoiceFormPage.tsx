@@ -271,7 +271,9 @@ export default function InvoiceFormPage() {
       taxAmount,
       total,
       notes,
+      termsAndConditions,
       status,
+      currencySymbol,
     });
   };
 
