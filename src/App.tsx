@@ -13,6 +13,7 @@ import ServicesPage from "./pages/ServicesPage";
 import ProposalsPage from "./pages/ProposalsPage";
 import JobsPage from "./pages/JobsPage";
 import InvoicesPage from "./pages/InvoicesPage";
+import InvoiceFormPage from "./pages/InvoiceFormPage";
 import BillingPage from "./pages/BillingPage";
 import TeamPage from "./pages/TeamPage";
 import SettingsPage from "./pages/SettingsPage";
@@ -54,6 +55,8 @@ const App = () => (
               <Route path="/proposals" element={<ProposalsPage />} />
               <Route path="/jobs" element={<JobsPage />} />
               <Route path="/invoices" element={<InvoicesPage />} />
+              <Route path="/invoices/new" element={<InvoiceFormPage />} />
+              <Route path="/invoices/:id/edit" element={<InvoiceFormPage />} />
               <Route path="/billing" element={<BillingPage />} />
               <Route path="/team" element={<TeamPage />} />
               <Route path="/settings" element={<SettingsPage />} />
