@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Zap } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 
@@ -15,6 +16,7 @@ export default function SignupPage() {
   const [fullName, setFullName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [role, setRole] = useState<string>("company_owner");
   const [submitting, setSubmitting] = useState(false);
   const [submitted, setSubmitted] = useState(false);
 
@@ -32,7 +34,7 @@ export default function SignupPage() {
       email,
       password,
       options: {
-        data: { full_name: fullName },
+        data: { full_name: fullName, role },
         emailRedirectTo: window.location.origin,
       },
     });
@@ -54,7 +56,10 @@ export default function SignupPage() {
             </div>
             <CardTitle>Check your email</CardTitle>
             <CardDescription>
-              We've sent a verification link to <strong>{email}</strong>. Click it to activate your account.
+              We've sent a verification link to <strong>{email}</strong>.
+              {role !== "company_owner" && (
+                <span className="block mt-2 text-xs">Your account will need approval from a company owner before you can access all features.</span>
+              )}
             </CardDescription>
           </CardHeader>
           <CardFooter className="justify-center">
@@ -88,6 +93,19 @@ export default function SignupPage() {
             <div className="space-y-2">
               <Label htmlFor="password">Password</Label>
               <Input id="password" type="password" required value={password} onChange={(e) => setPassword(e.target.value)} placeholder="Min. 6 characters" />
+            </div>
+            <div className="space-y-2">
+              <Label>I am a</Label>
+              <Select value={role} onValueChange={setRole}>
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="company_owner">Business Owner</SelectItem>
+                  <SelectItem value="customer">Customer</SelectItem>
+                  <SelectItem value="vendor">Vendor / Contractor</SelectItem>
+                </SelectContent>
+              </Select>
             </div>
           </CardContent>
           <CardFooter className="flex flex-col gap-3">

@@ -459,38 +459,51 @@ export type Database = {
       profiles: {
         Row: {
           avatar_url: string | null
+          belongs_to_company_id: string | null
           company_id: string | null
           created_at: string
           full_name: string | null
           id: string
           invited_by: string | null
           is_active: boolean | null
+          is_approved: boolean | null
           updated_at: string
           user_id: string
         }
         Insert: {
           avatar_url?: string | null
+          belongs_to_company_id?: string | null
           company_id?: string | null
           created_at?: string
           full_name?: string | null
           id?: string
           invited_by?: string | null
           is_active?: boolean | null
+          is_approved?: boolean | null
           updated_at?: string
           user_id: string
         }
         Update: {
           avatar_url?: string | null
+          belongs_to_company_id?: string | null
           company_id?: string | null
           created_at?: string
           full_name?: string | null
           id?: string
           invited_by?: string | null
           is_active?: boolean | null
+          is_approved?: boolean | null
           updated_at?: string
           user_id?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "profiles_belongs_to_company_id_fkey"
+            columns: ["belongs_to_company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "profiles_company_id_fkey"
             columns: ["company_id"]
@@ -793,7 +806,14 @@ export type Database = {
       }
     }
     Enums: {
-      app_role: "super_admin" | "company_owner" | "admin" | "manager" | "staff"
+      app_role:
+        | "super_admin"
+        | "company_owner"
+        | "admin"
+        | "manager"
+        | "staff"
+        | "customer"
+        | "vendor"
       invoice_status: "draft" | "sent" | "paid" | "overdue"
       job_status: "pending" | "in_progress" | "complete" | "rejected"
       payment_method: "cash" | "bank_transfer" | "cheque" | "card" | "other"
@@ -931,7 +951,15 @@ export type CompositeTypes<
 export const Constants = {
   public: {
     Enums: {
-      app_role: ["super_admin", "company_owner", "admin", "manager", "staff"],
+      app_role: [
+        "super_admin",
+        "company_owner",
+        "admin",
+        "manager",
+        "staff",
+        "customer",
+        "vendor",
+      ],
       invoice_status: ["draft", "sent", "paid", "overdue"],
       job_status: ["pending", "in_progress", "complete", "rejected"],
       payment_method: ["cash", "bank_transfer", "cheque", "card", "other"],

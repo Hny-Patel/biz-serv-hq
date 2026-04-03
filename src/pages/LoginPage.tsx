@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Link, Navigate } from "react-router-dom";
+import { Link, Navigate, useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { Button } from "@/components/ui/button";
@@ -9,15 +9,24 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { Zap } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 
+function getRoleRedirect(primaryRole: string | null): string {
+  switch (primaryRole) {
+    case "super_admin": return "/admin";
+    case "customer": return "/customer";
+    case "vendor": return "/vendor";
+    default: return "/";
+  }
+}
+
 export default function LoginPage() {
-  const { session, loading } = useAuth();
+  const { session, loading, primaryRole } = useAuth();
   const { toast } = useToast();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [submitting, setSubmitting] = useState(false);
 
   if (loading) return null;
-  if (session) return <Navigate to="/" replace />;
+  if (session) return <Navigate to={getRoleRedirect(primaryRole)} replace />;
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();

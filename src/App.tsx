@@ -1,9 +1,9 @@
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Route, Routes } from "react-router-dom";
+import { BrowserRouter, Route, Routes, Navigate } from "react-router-dom";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
-import { AuthProvider } from "@/contexts/AuthContext";
+import { AuthProvider, useAuth } from "@/contexts/AuthContext";
 import { ProtectedRoute } from "@/components/auth/ProtectedRoute";
 import { AppLayout } from "@/components/layout/AppLayout";
 import DashboardPage from "./pages/DashboardPage";
@@ -24,9 +24,29 @@ import LoginPage from "./pages/LoginPage";
 import SignupPage from "./pages/SignupPage";
 import ForgotPasswordPage from "./pages/ForgotPasswordPage";
 import ResetPasswordPage from "./pages/ResetPasswordPage";
+import PendingApprovalPage from "./pages/PendingApprovalPage";
+import CustomerDashboard from "./pages/CustomerDashboard";
+import VendorDashboard from "./pages/VendorDashboard";
 import NotFound from "./pages/NotFound";
+import { MinimalLayout } from "./components/layout/MinimalLayout";
 
 const queryClient = new QueryClient();
+
+function RoleBasedIndex() {
+  const { primaryRole, profile } = useAuth();
+
+  // Check approval for customers/vendors
+  if ((primaryRole === "customer" || primaryRole === "vendor") && !profile?.is_approved) {
+    return <Navigate to="/pending-approval" replace />;
+  }
+
+  switch (primaryRole) {
+    case "super_admin": return <Navigate to="/admin" replace />;
+    case "customer": return <Navigate to="/customer" replace />;
+    case "vendor": return <Navigate to="/vendor" replace />;
+    default: return <DashboardPage />;
+  }
+}
 
 const App = () => (
   <QueryClientProvider client={queryClient}>
@@ -42,15 +62,39 @@ const App = () => (
             <Route path="/forgot-password" element={<ForgotPasswordPage />} />
             <Route path="/reset-password" element={<ResetPasswordPage />} />
 
-            {/* Protected app routes */}
+            {/* Pending approval */}
+            <Route path="/pending-approval" element={
+              <ProtectedRoute><PendingApprovalPage /></ProtectedRoute>
+            } />
+
+            {/* Customer portal */}
+            <Route path="/customer" element={
+              <ProtectedRoute requiredRoles={["customer"]}>
+                <MinimalLayout title="Customer Portal" />
+              </ProtectedRoute>
+            }>
+              <Route index element={<CustomerDashboard />} />
+            </Route>
+
+            {/* Vendor portal */}
+            <Route path="/vendor" element={
+              <ProtectedRoute requiredRoles={["vendor"]}>
+                <MinimalLayout title="Vendor Portal" />
+              </ProtectedRoute>
+            }>
+              <Route index element={<VendorDashboard />} />
+            </Route>
+
+            {/* Company owner / admin app routes */}
             <Route
               element={
-                <ProtectedRoute>
+                <ProtectedRoute requiredRoles={["super_admin", "company_owner", "admin", "manager", "staff"]}>
                   <AppLayout />
                 </ProtectedRoute>
               }
             >
-              <Route path="/" element={<DashboardPage />} />
+              <Route path="/" element={<RoleBasedIndex />} />
+              <Route path="/dashboard" element={<DashboardPage />} />
               <Route path="/shop" element={<ShopPage />} />
               <Route path="/customers" element={<CustomersPage />} />
               <Route path="/services" element={<ServicesPage />} />

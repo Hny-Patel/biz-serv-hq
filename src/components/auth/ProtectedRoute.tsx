@@ -10,7 +10,7 @@ interface ProtectedRouteProps {
 }
 
 export function ProtectedRoute({ children, requiredRoles }: ProtectedRouteProps) {
-  const { session, loading, roles } = useAuth();
+  const { session, loading, roles, profile } = useAuth();
 
   if (loading) {
     return (
@@ -22,6 +22,16 @@ export function ProtectedRoute({ children, requiredRoles }: ProtectedRouteProps)
 
   if (!session) {
     return <Navigate to="/login" replace />;
+  }
+
+  // If customer/vendor not approved, redirect to pending page
+  const isCustomerOrVendor = roles.includes("customer") || roles.includes("vendor");
+  const onlyCustomerOrVendor = roles.every((r) => r === "customer" || r === "vendor");
+  if (onlyCustomerOrVendor && isCustomerOrVendor && profile && !profile.is_approved) {
+    // Allow access to pending-approval page
+    if (window.location.pathname !== "/pending-approval") {
+      return <Navigate to="/pending-approval" replace />;
+    }
   }
 
   if (requiredRoles && requiredRoles.length > 0) {
