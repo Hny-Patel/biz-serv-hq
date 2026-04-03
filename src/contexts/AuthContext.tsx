@@ -5,29 +5,38 @@ import type { Database } from "@/integrations/supabase/types";
 
 type AppRole = Database["public"]["Enums"]["app_role"];
 
+interface Profile {
+  id: string;
+  full_name: string | null;
+  company_id: string | null;
+  avatar_url: string | null;
+  is_approved: boolean;
+  belongs_to_company_id: string | null;
+}
+
 interface AuthContextType {
   session: Session | null;
   user: User | null;
-  profile: {
-    id: string;
-    full_name: string | null;
-    company_id: string | null;
-    avatar_url: string | null;
-  } | null;
+  profile: Profile | null;
   roles: AppRole[];
   loading: boolean;
   signOut: () => Promise<void>;
   hasRole: (role: AppRole) => boolean;
   isSuperAdmin: boolean;
   isCompanyOwner: boolean;
+  isCustomer: boolean;
+  isVendor: boolean;
+  primaryRole: AppRole | null;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
+const ROLE_PRIORITY: AppRole[] = ["super_admin", "company_owner", "admin", "manager", "staff", "vendor", "customer"];
+
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [session, setSession] = useState<Session | null>(null);
   const [user, setUser] = useState<User | null>(null);
-  const [profile, setProfile] = useState<AuthContextType["profile"]>(null);
+  const [profile, setProfile] = useState<Profile | null>(null);
   const [roles, setRoles] = useState<AppRole[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -35,7 +44,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     const [profileRes, rolesRes] = await Promise.all([
       supabase
         .from("profiles")
-        .select("id, full_name, company_id, avatar_url")
+        .select("id, full_name, company_id, avatar_url, is_approved, belongs_to_company_id")
         .eq("user_id", userId)
         .maybeSingle(),
       supabase
@@ -44,7 +53,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         .eq("user_id", userId),
     ]);
 
-    if (profileRes.data) setProfile(profileRes.data);
+    if (profileRes.data) {
+      setProfile({
+        ...profileRes.data,
+        is_approved: profileRes.data.is_approved ?? true,
+        belongs_to_company_id: (profileRes.data as any).belongs_to_company_id ?? null,
+      });
+    }
     if (rolesRes.data) setRoles(rolesRes.data.map((r) => r.role));
   };
 
@@ -82,6 +97,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const hasRole = (role: AppRole) => roles.includes(role);
 
+  const primaryRole = ROLE_PRIORITY.find((r) => roles.includes(r)) ?? null;
+
   return (
     <AuthContext.Provider
       value={{
@@ -94,6 +111,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         hasRole,
         isSuperAdmin: hasRole("super_admin"),
         isCompanyOwner: hasRole("company_owner"),
+        isCustomer: hasRole("customer"),
+        isVendor: hasRole("vendor"),
+        primaryRole,
       }}
     >
       {children}
